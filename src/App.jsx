@@ -212,21 +212,6 @@ export default function DarkSubscribe() {
           </motion.button>
         )}
 
-        <motion.h1
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          style={{
-            marginBottom: 30,
-            fontSize: 28,
-            fontWeight: 800,
-            background: "linear-gradient(90deg, #58a6ff, #ff7eb9)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
-        >
-          Premium Access
-        </motion.h1>
 
         {user ? (
           <motion.div
