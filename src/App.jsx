@@ -2,13 +2,15 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const BACKEND =
-  process.env.REACT_APP_BACKEND_URL || "https://subscribe-backend-2.onrender.com";
+  process.env.REACT_APP_BACKEND_URL ||
+  "https://subscribe-backend-2.onrender.com";
 
 export default function DarkSubscribe() {
-  const [user, setUser] = useState(null);          // stores { email } after subscribe
-  const [email, setEmail] = useState("");          // input state
+  const [user, setUser] = useState(null); // stores { email } after subscribe
+  const [email, setEmail] = useState(""); // input state
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("info");
+  const [isEmailValid, setIsEmailValid] = useState(true);
 
   // Restore session
   useEffect(() => {
@@ -28,13 +30,14 @@ export default function DarkSubscribe() {
     return () => clearTimeout(t);
   }, [message]);
 
-  // Email validator (same as backend for quick UX)
+  // Email validator (same as backend)
   function isValidEmail(v = "") {
     return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(String(v).trim());
   }
 
   async function handleEmailSubscribe() {
     if (!email || !isValidEmail(email)) {
+      setIsEmailValid(false);
       setMessageType("error");
       setMessage("Please enter a valid email");
       return;
@@ -48,7 +51,10 @@ export default function DarkSubscribe() {
       const data = await res.json();
       if (data.ok) {
         setUser({ email: data.email });
-        localStorage.setItem("subscribeUser", JSON.stringify({ email: data.email }));
+        localStorage.setItem(
+          "subscribeUser",
+          JSON.stringify({ email: data.email })
+        );
         setMessageType("success");
         setMessage(data.message);
       } else {
@@ -89,7 +95,8 @@ export default function DarkSubscribe() {
           left: 0,
           width: "100%",
           height: "100%",
-          background: "repeating-conic-gradient(#0d1117 0% 10%, #14171cff 10% 20%)",
+          background:
+            "repeating-conic-gradient(#0d1117 0% 10%, #14171cff 10% 20%)",
           opacity: 0.08,
           animation: "rotate 20s linear infinite",
           zIndex: 0,
@@ -146,14 +153,16 @@ export default function DarkSubscribe() {
         </AnimatePresence>
       </div>
 
+      {/* Card */}
       <motion.div
         style={{
           position: "relative",
-          background: "rgba(24,26,35,0.85)",
-          padding: 50,
-          borderRadius: 25,
+          background: "rgba(24,26,35,0.9)",
+          padding: 40,
+          borderRadius: 20,
           width: 420,
-          boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 0 25px rgba(88,166,255,0.4) inset",
+          boxShadow:
+            "0 20px 60px rgba(0,0,0,0.7), 0 0 25px rgba(88,166,255,0.4) inset",
           border: "1px solid rgba(88,166,255,0.5)",
           textAlign: "center",
           zIndex: 1,
@@ -165,98 +174,87 @@ export default function DarkSubscribe() {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.8 }}
       >
-        {user && (
-          <motion.button
-            onClick={handleLogout}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            style={{
-              position: "absolute",
-              top: 12,
-              right: 12,
-              fontSize: 12,
-              padding: "6px 12px",
-              border: "none",
-              borderRadius: 10,
-              background: "linear-gradient(90deg, #ff416c, #ff4b2b)",
-              color: "#fff",
-              cursor: "pointer",
-              fontWeight: "bold",
-              boxShadow: "0 0 15px rgba(255,65,43,0.7)",
-            }}
-          >
-            Logout
-          </motion.button>
-        )}
-
         {user ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7 }}
-            style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
-          >
-            <div
+          <>
+            <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 6 }}>
+              {user.email}
+            </p>
+            <p style={{ fontSize: 14, color: "#8b949e", marginBottom: 20 }}>
+              You are successfully subscribed 🎉
+            </p>
+            <motion.button
+              onClick={handleLogout}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               style={{
-                width: 90,
-                height: 90,
-                borderRadius: "50%",
-                border: "3px solid #58a6ff",
-                marginBottom: 14,
-                boxShadow: "0 0 20px rgba(88,166,255,0.7)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: 700,
-                fontSize: 20,
-                color: "#58a6ff",
-                background: "#0d1117",
-                userSelect: "none",
+                padding: "12px 24px",
+                border: "none",
+                borderRadius: 12,
+                background: "linear-gradient(90deg, #ff416c, #ff4b2b)",
+                color: "#fff",
+                fontWeight: "bold",
+                cursor: "pointer",
+                boxShadow: "0 0 15px rgba(255,65,43,0.7)",
               }}
-              title={user.email}
             >
-              {user.email?.slice(0, 2).toUpperCase()}
-            </div>
-            <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 6 }}>{user.email}</p>
-            <p style={{ fontSize: 14, color: "#8b949e" }}>Already subscribed.</p>
-          </motion.div>
+              Logout
+            </motion.button>
+          </>
         ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7 }}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 16,
-              width: "100%",
-            }}
-          >
+          <>
+            <h2
+              style={{
+                color: "#58a6ff",
+                marginBottom: 20,
+                fontSize: 22,
+                fontWeight: 700,
+              }}
+            >
+              Subscribe to our Newsletter
+            </h2>
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setIsEmailValid(isValidEmail(e.target.value));
+              }}
               placeholder="Enter your email"
               style={{
                 padding: "12px 16px",
                 borderRadius: 12,
-                border: "1px solid #58a6ff",
+                border: `1px solid ${isEmailValid ? "#58a6ff" : "#ff416c"}`,
                 background: "#0d1117",
                 color: "#fff",
                 outline: "none",
                 width: "100%",
-                boxShadow: "inset 0 0 10px rgba(88,166,255,0.2)",
+                boxShadow: isEmailValid
+                  ? "inset 0 0 10px rgba(88,166,255,0.2)"
+                  : "inset 0 0 10px rgba(255,65,108,0.3)",
               }}
             />
+            {!isEmailValid && (
+              <p
+                style={{
+                  color: "#ff416c",
+                  fontSize: 12,
+                  marginTop: 4,
+                  textAlign: "left",
+                  width: "100%",
+                }}
+              >
+                Please enter a valid email address.
+              </p>
+            )}
             <motion.button
               onClick={handleEmailSubscribe}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.97 }}
               style={{
-                padding: "16px 40px",
+                marginTop: 20,
+                padding: "14px 32px",
                 fontSize: 16,
-                borderRadius: 25,
+                borderRadius: 20,
                 border: "2px solid #58a6ff",
                 background: "linear-gradient(90deg, #0d1117, #161b22)",
                 color: "#58a6ff",
@@ -264,12 +262,11 @@ export default function DarkSubscribe() {
                 cursor: "pointer",
                 boxShadow:
                   "0 0 25px rgba(88,166,255,0.6), inset 0 0 10px rgba(88,166,255,0.3)",
-                width: "fit-content",
               }}
             >
               Subscribe Now
             </motion.button>
-          </motion.div>
+          </>
         )}
       </motion.div>
     </div>
