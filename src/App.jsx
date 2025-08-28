@@ -1,78 +1,56 @@
-                                                                             
- import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const BACKEND = process.env.REACT_APP_BACKEND_URL || "https://subscribe-backend-2.onrender.com";
-const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+const BACKEND =
+  process.env.REACT_APP_BACKEND_URL || "https://subscribe-backend-2.onrender.com";
 
 export default function DarkSubscribe() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null);          // stores { email } after subscribe
+  const [email, setEmail] = useState("");          // input state
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("info");
-  const [showGoogleButton, setShowGoogleButton] = useState(false);
 
+  // Restore session
   useEffect(() => {
     const savedUser = localStorage.getItem("subscribeUser");
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      const u = JSON.parse(savedUser);
+      setUser(u);
       setMessageType("success");
-      setMessage(`Welcome back, ${JSON.parse(savedUser).name}`);
-      setShowGoogleButton(false);
+      setMessage(`Welcome back${u.email ? `, ${u.email}` : ""}`);
     }
   }, []);
 
-  useEffect(() => {
-    if (!window.google || !showGoogleButton) return;
-    window.google.accounts.id.initialize({
-      client_id: CLIENT_ID,
-      callback: handleCredentialResponse,
-      ux_mode: "popup",
-    });
-    window.google.accounts.id.renderButton(
-      document.getElementById("google-button-container"),
-      {
-        theme: "filled_blue",
-        size: "large",
-        width: 280,
-        shape: "pill",
-        text: "signin_with",
-      }
-    );
-  }, [showGoogleButton]);
-
+  // Auto-hide toast
   useEffect(() => {
     if (!message) return;
-    const timer = setTimeout(() => setMessage(""), 3000);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setMessage(""), 3000);
+    return () => clearTimeout(t);
   }, [message]);
 
-  const handleSubscribeClick = () => setShowGoogleButton(true);
+  // Email validator (same as backend for quick UX)
+  function isValidEmail(v = "") {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(String(v).trim());
+  }
 
-  async function handleCredentialResponse(response) {
-    if (!response?.credential) {
+  async function handleEmailSubscribe() {
+    if (!email || !isValidEmail(email)) {
       setMessageType("error");
-      setMessage("Google sign-in failed: id_token missing");
+      setMessage("Please enter a valid email");
       return;
     }
-
     try {
-      const res = await fetch(`${BACKEND}/api/auth/google`, {
+      const res = await fetch(`${BACKEND}/api/subscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_token: response.credential, message: "Subscribed" }),
+        body: JSON.stringify({ email }),
       });
       const data = await res.json();
-
       if (data.ok) {
-        setUser(data.user);
-        localStorage.setItem("subscribeUser", JSON.stringify(data.user));
-        setShowGoogleButton(false);
+        setUser({ email: data.email });
+        localStorage.setItem("subscribeUser", JSON.stringify({ email: data.email }));
         setMessageType("success");
-        setMessage(
-          data.existing
-            ? `Welcome back, ${data.user.name}. Already subscribed.`
-            : `Welcome ${data.user.name}. Subscription saved.`
-        );
+        setMessage(data.message);
       } else {
         setMessageType("error");
         setMessage("Error: " + (data.msg || JSON.stringify(data)));
@@ -88,7 +66,6 @@ export default function DarkSubscribe() {
     localStorage.removeItem("subscribeUser");
     setMessage("Logged out");
     setMessageType("info");
-    setShowGoogleButton(false);
   }
 
   return (
@@ -125,7 +102,7 @@ export default function DarkSubscribe() {
         }
       `}</style>
 
-      {/* Toast messages */}
+      {/* Toast */}
       <div style={{ position: "absolute", top: 20, right: 20, zIndex: 10 }}>
         <AnimatePresence>
           {message && (
@@ -212,7 +189,6 @@ export default function DarkSubscribe() {
           </motion.button>
         )}
 
-
         {user ? (
           <motion.div
             initial={{ opacity: 0 }}
@@ -220,9 +196,7 @@ export default function DarkSubscribe() {
             transition={{ duration: 0.7 }}
             style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
           >
-            <img
-              src={user.picture}
-              alt={user.name}
+            <div
               style={{
                 width: 90,
                 height: 90,
@@ -230,9 +204,20 @@ export default function DarkSubscribe() {
                 border: "3px solid #58a6ff",
                 marginBottom: 14,
                 boxShadow: "0 0 20px rgba(88,166,255,0.7)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 700,
+                fontSize: 20,
+                color: "#58a6ff",
+                background: "#0d1117",
+                userSelect: "none",
               }}
-            />
-            <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 6 }}>{user.name}</p>
+              title={user.email}
+            >
+              {user.email?.slice(0, 2).toUpperCase()}
+            </div>
+            <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 6 }}>{user.email}</p>
             <p style={{ fontSize: 14, color: "#8b949e" }}>Already subscribed.</p>
           </motion.div>
         ) : (
@@ -244,39 +229,46 @@ export default function DarkSubscribe() {
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              gap: 20,
+              gap: 16,
               width: "100%",
             }}
           >
-            {!showGoogleButton && (
-              <motion.button
-                onClick={handleSubscribeClick}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.97 }}
-                style={{
-                  padding: "16px 40px",
-                  fontSize: 16,
-                  borderRadius: 25,
-                  border: "2px solid #58a6ff",
-                  background: "linear-gradient(90deg, #0d1117, #161b22)",
-                  color: "#58a6ff",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                  boxShadow: "0 0 25px rgba(88,166,255,0.6), inset 0 0 10px rgba(88,166,255,0.3)",
-                  transition: "all 0.3s ease",
-                  width: "fit-content",
-                }}
-              >
-                Subscribe Now
-              </motion.button>
-            )}
-
-            {showGoogleButton && (
-              <div
-                id="google-button-container"
-                style={{ marginTop: 10, display: "flex", justifyContent: "center", width: "100%" }}
-              />
-            )}
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              style={{
+                padding: "12px 16px",
+                borderRadius: 12,
+                border: "1px solid #58a6ff",
+                background: "#0d1117",
+                color: "#fff",
+                outline: "none",
+                width: "100%",
+                boxShadow: "inset 0 0 10px rgba(88,166,255,0.2)",
+              }}
+            />
+            <motion.button
+              onClick={handleEmailSubscribe}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.97 }}
+              style={{
+                padding: "16px 40px",
+                fontSize: 16,
+                borderRadius: 25,
+                border: "2px solid #58a6ff",
+                background: "linear-gradient(90deg, #0d1117, #161b22)",
+                color: "#58a6ff",
+                fontWeight: "bold",
+                cursor: "pointer",
+                boxShadow:
+                  "0 0 25px rgba(88,166,255,0.6), inset 0 0 10px rgba(88,166,255,0.3)",
+                width: "fit-content",
+              }}
+            >
+              Subscribe Now
+            </motion.button>
           </motion.div>
         )}
       </motion.div>
