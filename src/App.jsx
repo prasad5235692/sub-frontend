@@ -38,8 +38,6 @@ export default function DarkSubscribe() {
   async function handleEmailSubscribe() {
     if (!email || !isValidEmail(email)) {
       setIsEmailValid(false);
-      setMessageType("error");
-      setMessage("Please enter a valid email");
       return;
     }
     try {
@@ -96,7 +94,7 @@ export default function DarkSubscribe() {
           width: "100%",
           height: "100%",
           background:
-            "repeating-conic-gradient(#0d1117 0% 10%, #14171cff 10% 20%)",
+            "repeating-conic-gradient(#0d1117 0% 10%, #111213ff 10% 20%)",
           opacity: 0.08,
           animation: "rotate 20s linear infinite",
           zIndex: 0,
@@ -202,16 +200,6 @@ export default function DarkSubscribe() {
           </>
         ) : (
           <>
-            <h2
-              style={{
-                color: "#58a6ff",
-                marginBottom: 20,
-                fontSize: 22,
-                fontWeight: 700,
-              }}
-            >
-              Subscribe to our Newsletter
-            </h2>
             <input
               type="email"
               value={email}
@@ -243,7 +231,7 @@ export default function DarkSubscribe() {
                   width: "100%",
                 }}
               >
-                Please enter a valid email address.
+                Please enter a valid mail address.
               </p>
             )}
             <motion.button
