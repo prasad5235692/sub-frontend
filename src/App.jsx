@@ -156,7 +156,7 @@ export default function DarkSubscribe() {
             setEmail(e.target.value);
             setIsEmailValid(isValidEmail(e.target.value));
           }}
-          placeholder="Enter your email"
+          placeholder="Enter your mail"
           style={{
             padding: "12px 16px",
             borderRadius: 12,
@@ -180,7 +180,7 @@ export default function DarkSubscribe() {
               width: "100%",
             }}
           >
-            Please enter a valid email address.
+            Please enter a valid mail address.
           </p>
         )}
         <motion.button
@@ -201,7 +201,7 @@ export default function DarkSubscribe() {
               "0 0 25px rgba(88,166,255,0.6), inset 0 0 10px rgba(88,166,255,0.3)",
           }}
         >
-          Subscribe Now
+          Subscribe
         </motion.button>
       </motion.div>
     </div>
