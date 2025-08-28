@@ -24,30 +24,35 @@ export default function DarkSubscribe() {
   }
 
   async function handleEmailSubscribe() {
-    if (!email || !isValidEmail(email)) {
-      setIsEmailValid(false);
-      return;
-    }
-    try {
-      const res = await fetch(`${BACKEND}/api/subscribe`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      if (data.ok) {
-        setMessageType("success");
-        setMessage("You are successfully subscribed 🎉");
-        setEmail(""); // clear input
-      } else {
-        setMessageType("error");
-        setMessage("Error: " + (data.msg || JSON.stringify(data)));
-      }
-    } catch (err) {
-      setMessageType("error");
-      setMessage("Network error: " + err.message);
-    }
+  if (!email || !isValidEmail(email)) {
+    setIsEmailValid(false);
+    return;
   }
+  try {
+    const res = await fetch(`${BACKEND}/api/subscribe`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      setMessageType("success");
+      if (data.existing) {
+        setMessage("You already subscribed. Welcome back 👋");
+      } else {
+        setMessage("You are successfully subscribed 🎉");
+      }
+      setEmail(""); // clear input
+    } else {
+      setMessageType("error");
+      setMessage("Error: " + (data.msg || JSON.stringify(data)));
+    }
+  } catch (err) {
+    setMessageType("error");
+    setMessage("Network error: " + err.message);
+  }
+}
+
 
   return (
     <div
