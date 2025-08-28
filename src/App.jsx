@@ -6,22 +6,10 @@ const BACKEND =
   "https://subscribe-backend-2.onrender.com";
 
 export default function DarkSubscribe() {
-  const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("info");
   const [isEmailValid, setIsEmailValid] = useState(true);
-
-  // Restore session
-  useEffect(() => {
-    const savedUser = localStorage.getItem("subscribeUser");
-    if (savedUser) {
-      const u = JSON.parse(savedUser);
-      setUser(u);
-      setMessageType("success");
-      setMessage("You are successfully subscribed 🎉");
-    }
-  }, []);
 
   // Auto-hide toast
   useEffect(() => {
@@ -48,13 +36,9 @@ export default function DarkSubscribe() {
       });
       const data = await res.json();
       if (data.ok) {
-        setUser({ email: data.email });
-        localStorage.setItem(
-          "subscribeUser",
-          JSON.stringify({ email: data.email })
-        );
         setMessageType("success");
         setMessage("You are successfully subscribed 🎉");
+        setEmail(""); // clear input
       } else {
         setMessageType("error");
         setMessage("Error: " + (data.msg || JSON.stringify(data)));
@@ -63,13 +47,6 @@ export default function DarkSubscribe() {
       setMessageType("error");
       setMessage("Network error: " + err.message);
     }
-  }
-
-  function handleLogout() {
-    setUser(null);
-    localStorage.removeItem("subscribeUser");
-    setMessage("Logged out");
-    setMessageType("info");
   }
 
   return (
@@ -151,7 +128,7 @@ export default function DarkSubscribe() {
         </AnimatePresence>
       </div>
 
-      {/* Card */}
+      {/* Card (Only Email Form) */}
       <motion.div
         style={{
           position: "relative",
@@ -172,90 +149,60 @@ export default function DarkSubscribe() {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.8 }}
       >
-        {user ? (
-          <>
-            <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 6 }}>
-              {user.email}
-            </p>
-            <p style={{ fontSize: 14, color: "#3fb950", marginBottom: 20 }}>
-              You are successfully subscribed 🎉
-            </p>
-            <motion.button
-              onClick={handleLogout}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              style={{
-                padding: "12px 24px",
-                border: "none",
-                borderRadius: 12,
-                background: "linear-gradient(90deg, #ff416c, #ff4b2b)",
-                color: "#fff",
-                fontWeight: "bold",
-                cursor: "pointer",
-                boxShadow: "0 0 15px rgba(255,65,43,0.7)",
-              }}
-            >
-              Logout
-            </motion.button>
-          </>
-        ) : (
-          <>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setIsEmailValid(isValidEmail(e.target.value));
-              }}
-              placeholder="Enter your email"
-              style={{
-                padding: "12px 16px",
-                borderRadius: 12,
-                border: `1px solid ${isEmailValid ? "#58a6ff" : "#ff416c"}`,
-                background: "#0d1117",
-                color: "#fff",
-                outline: "none",
-                width: "100%",
-                boxShadow: isEmailValid
-                  ? "inset 0 0 10px rgba(88,166,255,0.2)"
-                  : "inset 0 0 10px rgba(255,65,108,0.3)",
-              }}
-            />
-            {!isEmailValid && (
-              <p
-                style={{
-                  color: "#ff416c",
-                  fontSize: 12,
-                  marginTop: 4,
-                  textAlign: "left",
-                  width: "100%",
-                }}
-              >
-                Please enter a valid mail address.
-              </p>
-            )}
-            <motion.button
-              onClick={handleEmailSubscribe}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.97 }}
-              style={{
-                marginTop: 20,
-                padding: "14px 32px",
-                fontSize: 16,
-                borderRadius: 20,
-                border: "2px solid #58a6ff",
-                background: "linear-gradient(90deg, #0d1117, #161b22)",
-                color: "#58a6ff",
-                fontWeight: "bold",
-                cursor: "pointer",
-                boxShadow:
-                  "0 0 25px rgba(88,166,255,0.6), inset 0 0 10px rgba(88,166,255,0.3)",
-              }}
-            >
-              Subscribe Now
-            </motion.button>
-          </>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setIsEmailValid(isValidEmail(e.target.value));
+          }}
+          placeholder="Enter your email"
+          style={{
+            padding: "12px 16px",
+            borderRadius: 12,
+            border: `1px solid ${isEmailValid ? "#58a6ff" : "#ff416c"}`,
+            background: "#0d1117",
+            color: "#fff",
+            outline: "none",
+            width: "100%",
+            boxShadow: isEmailValid
+              ? "inset 0 0 10px rgba(88,166,255,0.2)"
+              : "inset 0 0 10px rgba(255,65,108,0.3)",
+          }}
+        />
+        {!isEmailValid && (
+          <p
+            style={{
+              color: "#ff416c",
+              fontSize: 12,
+              marginTop: 4,
+              textAlign: "left",
+              width: "100%",
+            }}
+          >
+            Please enter a valid email address.
+          </p>
         )}
+        <motion.button
+          onClick={handleEmailSubscribe}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.97 }}
+          style={{
+            marginTop: 20,
+            padding: "14px 32px",
+            fontSize: 16,
+            borderRadius: 20,
+            border: "2px solid #58a6ff",
+            background: "linear-gradient(90deg, #0d1117, #161b22)",
+            color: "#58a6ff",
+            fontWeight: "bold",
+            cursor: "pointer",
+            boxShadow:
+              "0 0 25px rgba(88,166,255,0.6), inset 0 0 10px rgba(88,166,255,0.3)",
+          }}
+        >
+          Subscribe Now
+        </motion.button>
       </motion.div>
     </div>
   );
