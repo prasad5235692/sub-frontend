@@ -6,8 +6,8 @@ const BACKEND =
   "https://subscribe-backend-2.onrender.com";
 
 export default function DarkSubscribe() {
-  const [user, setUser] = useState(null); // stores { email } after subscribe
-  const [email, setEmail] = useState(""); // input state
+  const [user, setUser] = useState(null);
+  const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("info");
   const [isEmailValid, setIsEmailValid] = useState(true);
@@ -19,7 +19,7 @@ export default function DarkSubscribe() {
       const u = JSON.parse(savedUser);
       setUser(u);
       setMessageType("success");
-      setMessage(`Welcome back${u.email ? `, ${u.email}` : ""}`);
+      setMessage("You are successfully subscribed 🎉");
     }
   }, []);
 
@@ -30,7 +30,7 @@ export default function DarkSubscribe() {
     return () => clearTimeout(t);
   }, [message]);
 
-  // Email validator (same as backend)
+  // Email validator
   function isValidEmail(v = "") {
     return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(String(v).trim());
   }
@@ -56,7 +56,7 @@ export default function DarkSubscribe() {
           JSON.stringify({ email: data.email })
         );
         setMessageType("success");
-        setMessage(data.message);
+        setMessage("You are successfully subscribed 🎉");
       } else {
         setMessageType("error");
         setMessage("Error: " + (data.msg || JSON.stringify(data)));
@@ -87,7 +87,7 @@ export default function DarkSubscribe() {
         background: "linear-gradient(120deg, #0f0c29, #302b63, #24243e)",
       }}
     >
-      {/* Animated background */}
+      {/* Background animation */}
       <div
         style={{
           position: "absolute",
@@ -179,7 +179,7 @@ export default function DarkSubscribe() {
             <p style={{ fontSize: 18, fontWeight: 600, marginBottom: 6 }}>
               {user.email}
             </p>
-            <p style={{ fontSize: 14, color: "#8b949e", marginBottom: 20 }}>
+            <p style={{ fontSize: 14, color: "#3fb950", marginBottom: 20 }}>
               You are successfully subscribed 🎉
             </p>
             <motion.button
